@@ -48,31 +48,60 @@ contract HexColors is ERC721, Ownable {
         return value;
     }
 
-    function combine2(uint256 firstToken, uint256 secondToken)
+    function combineRedAndGreen(uint256 redToken, uint256 greenToken)
         external
         returns (uint256)
     {
-        require(ownerOf(firstToken) == msg.sender);
-        require(ownerOf(secondToken) == msg.sender);
-        // TODO: require(all different channels)
-        // TODO: find channels of firstToken and secondToken
-        uint256 newTokenId = 0; // TODO: combine the two channels above
+        require(ownerOf(redToken) == msg.sender);
+        require(ownerOf(greenToken) == msg.sender);
+        require(redToken % 65536 == 0);
+        require(greenToken % 256 == 0);
+        uint256 newTokenId = redToken + greenToken;
+        _safeMint(address(msg.sender), newTokenId);
+
+        return newTokenId;
+    }
+
+    function combineRedAndBlue(uint256 redToken, uint256 blueToken)
+        external
+        returns (uint256)
+    {
+        require(ownerOf(redToken) == msg.sender);
+        require(ownerOf(blueToken) == msg.sender);
+        require(redToken % 65536 == 0);
+        require(blueToken < 256);
+        uint256 newTokenId = redToken + blueToken;
+        _safeMint(address(msg.sender), newTokenId);
+
+        return newTokenId;
+    }
+
+    function combineGreenAndBlue(uint256 greenToken, uint256 blueToken)
+        external
+        returns (uint256)
+    {
+        require(ownerOf(blueToken) == msg.sender);
+        require(ownerOf(greenToken) == msg.sender);
+        require(blueToken < 256);
+        require(greenToken % 256 == 0);
+        uint256 newTokenId = greenToken + blueToken;
         _safeMint(address(msg.sender), newTokenId);
 
         return newTokenId;
     }
 
     function combine3(
-        uint256 firstToken,
-        uint256 secondToken,
-        uint256 thirdToken
+        uint256 redToken,
+        uint256 greenToken,
+        uint256 blueToken
     ) external returns (uint256) {
-        require(ownerOf(firstToken) == msg.sender);
-        require(ownerOf(secondToken) == msg.sender);
-        require(ownerOf(thirdToken) == msg.sender);
-        // TODO: require(all different channels)
-        // TODO: find channels of firstToken and secondToken
-        uint256 newTokenId = 0; // TODO: combine the two channels above
+        require(ownerOf(redToken) == msg.sender);
+        require(ownerOf(greenToken) == msg.sender);
+        require(ownerOf(blueToken) == msg.sender);
+        require(redToken % 65536 == 0);
+        require(greenToken % 256 == 0);
+        require(blueToken < 256);
+        uint256 newTokenId = redToken + greenToken + blueToken;
         _safeMint(address(msg.sender), newTokenId);
 
         return newTokenId;

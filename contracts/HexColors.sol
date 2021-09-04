@@ -21,9 +21,14 @@ contract HexColors is ERC721, Ownable {
         payable(owner()).transfer(address(this).balance);
     }
 
+    function mintBlack() external onlyOwner returns (uint256) {
+        _safeMint(msg.sender, 0);
+        return 0;
+    }
+
     function mintRed(uint256 value) external returns (uint256) {
         // XX0000
-        require(value >= 0);
+        require(value > 0);
         require(value < 256);
         uint256 newTokenId = value * 65536;
         _safeMint(address(msg.sender), newTokenId);
@@ -33,7 +38,7 @@ contract HexColors is ERC721, Ownable {
 
     function mintGreen(uint256 value) external returns (uint256) {
         // 00XX00
-        require(value >= 0);
+        require(value > 0);
         require(value < 256);
         uint256 newTokenId = value * 256;
         _safeMint(address(msg.sender), newTokenId);
@@ -42,7 +47,7 @@ contract HexColors is ERC721, Ownable {
 
     function mintBlue(uint256 value) external returns (uint256) {
         // 0000XX
-        require(value >= 0);
+        require(value > 0);
         require(value < 256);
         _safeMint(address(msg.sender), value);
         return value;

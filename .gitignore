@@ -1,3 +1,7 @@
 node_modules
 hardhat.config.ts
+artifacts/
+cache/
+scripts/
+typechain/
 

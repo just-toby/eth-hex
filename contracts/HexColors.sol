@@ -3,8 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract HexColors is ERC721, Ownable {
+    using SafeMath for uint256;
+
     constructor() ERC721("HexColors", "HEXC") {}
 
     // Fallback function to make this contract payable.
@@ -15,6 +18,15 @@ contract HexColors is ERC721, Ownable {
      */
     function _baseURI() internal pure override returns (string memory) {
         return "https://www.eth-hex.com/api/token?id=";
+    }
+
+    function tokenURI(uint256 tokenId) public view returns (string memory) {
+        string hexValue = 0x0 + tokenId;
+        return
+            '<svg width="100" height="100"><rect fill="' +
+            "#" +
+            "" +
+            '" width="100" height="100"/></svg>';
     }
 
     function withdraw() external onlyOwner {
@@ -53,60 +65,30 @@ contract HexColors is ERC721, Ownable {
         return value;
     }
 
-    function combineRedAndGreen(uint256 redToken, uint256 greenToken)
+    function combine(uint256 firstToken, uint256 secondToken)
         external
         returns (uint256)
     {
-        require(ownerOf(redToken) == msg.sender);
-        require(ownerOf(greenToken) == msg.sender);
-        require(redToken % 65536 == 0);
-        require(greenToken % 256 == 0);
-        uint256 newTokenId = redToken + greenToken;
-        _safeMint(address(msg.sender), newTokenId);
+        require(ownerOf(firstToken) == msg.sender);
+        require(ownerOf(secondToken) == msg.sender);
 
-        return newTokenId;
-    }
+        // XX0000
+        uint256 firstRed = firstToken.div(65536);
+        uint256 secondRed = secondToken.div(65536);
 
-    function combineRedAndBlue(uint256 redToken, uint256 blueToken)
-        external
-        returns (uint256)
-    {
-        require(ownerOf(redToken) == msg.sender);
-        require(ownerOf(blueToken) == msg.sender);
-        require(redToken % 65536 == 0);
-        require(blueToken < 256);
-        uint256 newTokenId = redToken + blueToken;
-        _safeMint(address(msg.sender), newTokenId);
+        // 00XX00
+        uint256 firstGreen = firstToken.div(256).mod(256);
+        uint256 secondGreen = secondToken.div(256).mod(256);
 
-        return newTokenId;
-    }
+        // 0000XX
+        uint256 firstBlue = firstToken.mod(256);
+        uint256 secondBlue = secondToken.mod(256);
 
-    function combineGreenAndBlue(uint256 greenToken, uint256 blueToken)
-        external
-        returns (uint256)
-    {
-        require(ownerOf(blueToken) == msg.sender);
-        require(ownerOf(greenToken) == msg.sender);
-        require(blueToken < 256);
-        require(greenToken % 256 == 0);
-        uint256 newTokenId = greenToken + blueToken;
-        _safeMint(address(msg.sender), newTokenId);
+        uint256 newRed = ((firstRed + secondRed).div(2)).mul(65536);
+        uint256 newGreen = ((firstGreen + secondGreen).div(2)).mul(256);
+        uint256 newBlue = (firstBlue + secondBlue).div(2);
 
-        return newTokenId;
-    }
-
-    function combine3(
-        uint256 redToken,
-        uint256 greenToken,
-        uint256 blueToken
-    ) external returns (uint256) {
-        require(ownerOf(redToken) == msg.sender);
-        require(ownerOf(greenToken) == msg.sender);
-        require(ownerOf(blueToken) == msg.sender);
-        require(redToken % 65536 == 0);
-        require(greenToken % 256 == 0);
-        require(blueToken < 256);
-        uint256 newTokenId = redToken + greenToken + blueToken;
+        uint256 newTokenId = newRed + newGreen + newBlue;
         _safeMint(address(msg.sender), newTokenId);
 
         return newTokenId;
